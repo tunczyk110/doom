@@ -24,6 +24,7 @@
 static const char
 rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
+#include <strings.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ipc.h>
@@ -46,7 +47,7 @@ int XShmGetEventBase( Display* dpy ); // problems with g++?
 #include <sys/socket.h>
 
 #include <netinet/in.h>
-#include <errnos.h>
+#include <errno.h>
 #include <signal.h>
 
 #include "doomstat.h"
@@ -817,6 +818,7 @@ void I_InitGraphics(void)
 					attribmask,
 					&attribs );
 
+    XInstallColormap(X_display, X_cmap);
     XDefineCursor(X_display, X_mainWindow,
 		  createnullcursor( X_display, X_mainWindow ) );
 
