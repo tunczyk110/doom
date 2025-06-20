@@ -185,7 +185,11 @@ V_CopyRect
     V_MarkRect (destx, desty, width, height); 
 	 
     src = screens[srcscrn]+SCREENWIDTH*srcy+srcx; 
-    dest = screens[destscrn]+SCREENWIDTH*desty+destx; 
+    if (destscrn == 0) {
+        dest = screen_pixels + SCREENWIDTH*desty + destx;
+    } else {
+        dest = screens[destscrn]+SCREENWIDTH*desty+destx;
+    }
 
     for ( ; height>0 ; height--) 
     { 
@@ -236,7 +240,11 @@ V_DrawPatch
 	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
+    if (scrn == 0) {
+        desttop = screen_pixels+y*SCREENWIDTH+x;
+    } else {
+        desttop = screens[scrn]+y*SCREENWIDTH+x;
+    }
 	 
     w = SHORT(patch->width); 
 
@@ -300,15 +308,19 @@ V_DrawPatchFlipped
     if (!scrn)
 	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
-    col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
-	 
+    col = 0;
+    if (scrn == 0) {
+        desttop = screen_pixels+y*SCREENWIDTH+x;
+    } else {
+        desttop = screens[scrn]+y*SCREENWIDTH+x;
+    }
+
     w = SHORT(patch->width); 
 
     for ( ; col<w ; x++, col++, desttop++) 
     { 
 	column = (column_t *)((byte *)patch + LONG(patch->columnofs[w-1-col])); 
- 
+
 	// step through the posts in a column 
 	while (column->topdelta != 0xff ) 
 	{ 
@@ -425,7 +437,11 @@ V_DrawBlock
  
     V_MarkRect (x, y, width, height); 
  
-    dest = screens[scrn] + y*SCREENWIDTH+x; 
+    if (scrn == 0) {
+        dest = screen_pixels + y*SCREENWIDTH+x;
+    } else {
+        dest = screens[scrn] + y*SCREENWIDTH+x;
+    }
 
     while (height--) 
     { 

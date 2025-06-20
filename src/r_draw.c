@@ -713,11 +713,11 @@ R_InitBuffer
     if (width == SCREENWIDTH) 
 	viewwindowy = 0; 
     else 
-	viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1; 
+	viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1;
 
     // Preclaculate all row offsets.
     for (i=0 ; i<height ; i++) 
-	ylookup[i] = screens[0] + (i+viewwindowy)*SCREENWIDTH; 
+	ylookup[i] = screen_pixels + (i+viewwindowy)*SCREENWIDTH;
 } 
  
  
@@ -825,7 +825,7 @@ R_VideoErase
   //  is not optiomal, e.g. byte by byte on
   //  a 32bit CPU, as GNU GCC/Linux libc did
   //  at one point.
-    memcpy (screens[0]+ofs, screens[1]+ofs, count); 
+    memcpy (screen_pixels+ofs, screens[1]+ofs, count);
 } 
 
 

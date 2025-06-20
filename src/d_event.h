@@ -26,6 +26,7 @@
 
 #include "doomtype.h"
 
+#include <SDL3/SDL.h>
 
 //
 // Event handling.
@@ -112,6 +113,9 @@ extern  int             eventhead;
 extern	int		eventtail;
 
 extern  gameaction_t    gameaction;
+
+
+event_t TranslateEvent(const SDL_Event* sdl_event);
 
 
 #endif

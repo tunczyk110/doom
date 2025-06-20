@@ -290,9 +290,6 @@ static cheatseq_t cheat_amap = { cheat_amap_seq, 0 };
 static boolean stopped = true;
 
 extern boolean viewactive;
-//extern byte screens[][SCREENWIDTH*SCREENHEIGHT];
-
-
 
 void
 V_MarkRect
@@ -461,7 +458,7 @@ void AM_initVariables(void)
     static event_t st_notify = { ev_keyup, AM_MSGENTERED };
 
     automapactive = true;
-    fb = screens[0];
+    fb = screen_pixels;
 
     f_oldloc.x = MAXINT;
     amclock = 0;

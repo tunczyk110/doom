@@ -36,6 +36,8 @@ typedef enum {false, true} boolean;
 typedef unsigned char byte;
 #endif
 
+typedef byte pixel_t;
+
 
 // Predefined with some OS.
 #ifdef LINUX

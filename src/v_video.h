@@ -45,6 +45,7 @@
 
 
 extern	byte*		screens[5];
+extern pixel_t* screen_pixels;
 
 extern  int	dirtybox[4];
 
