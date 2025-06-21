@@ -1,31 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM main program (D_DoomMain) and game loop (D_DoomLoop),
-//	plus functions to determine game mode (shareware, registered),
-//	parse command line parameters, configure game parameters (turbo),
-//	and call the startup functions.
-//
-//-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #define	BGCOLOR		7
 #define	FGCOLOR		8
@@ -340,7 +325,10 @@ void D_Display (void)
     } while (!done);
 }
 
+void poll_events(void)
+{
 
+}
 
 //
 //  D_DoomLoop
@@ -349,53 +337,56 @@ extern  boolean         demorecording;
 
 void D_DoomLoop (void)
 {
-    if (demorecording)
-	G_BeginRecording ();
-		
+    boolean quit = false;
+
+    if (demorecording) {
+        G_BeginRecording ();
+    }
+
     if (M_CheckParm ("-debugfile"))
     {
-	char    filename[20];
-	sprintf (filename,"debug%i.txt",consoleplayer);
-	printf ("debug output to: %s\n",filename);
-	debugfile = fopen (filename,"w");
+        char filename[20];
+        sprintf(filename,"debug%i.txt",consoleplayer);
+        printf("debug output to: %s\n",filename);
+        debugfile = fopen(filename,"w");
     }
-	
+
     I_InitGraphics ();
 
-    while (1)
+    while (!quit)
     {
-	// process one or more tics
-	if (singletics)
-	{
-	    I_StartTic ();
-	    D_ProcessEvents ();
-	    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
-	    if (advancedemo)
-		D_DoAdvanceDemo ();
-	    M_Ticker ();
-	    G_Ticker ();
-	    gametic++;
-	    maketic++;
-	}
-	else
-	{
-	    TryRunTics (); // will run at least one tic
-	}
-		
-	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
+        // process one or more tics
+        if (singletics)
+        {
+            I_StartTic ();
+            D_ProcessEvents ();
+            G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
+            if (advancedemo)
+            D_DoAdvanceDemo ();
+            M_Ticker ();
+            G_Ticker ();
+            gametic++;
+            maketic++;
+        }
+        else
+        {
+            TryRunTics (); // will run at least one tic
+        }
+            
+        S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
 
-	// Update display, next frame, with current state.
-	D_Display ();
+        // Update display, next frame, with current state.
+        D_Display ();
 
-#ifndef SNDSERV
-	// Sound mixing for the buffer is snychronous.
-	I_UpdateSound();
-#endif	
-	// Synchronous sound output is explicitly called.
-#ifndef SNDINTR
-	// Update sound output.
-	I_SubmitSound();
-#endif
+    #ifndef SNDSERV
+        // Sound mixing for the buffer is snychronous.
+        I_UpdateSound();
+    #endif	
+        // Synchronous sound output is explicitly called.
+    #ifndef SNDINTR
+        // Update sound output.
+        I_SubmitSound();
+    #endif
     }
 }
 
@@ -606,48 +597,6 @@ void IdentifyVersion (void)
       I_Error("Please set $HOME to your home directory");
     sprintf(basedefault, "%s/.doomrc", home);
 #endif
-
-    if (M_CheckParm ("-shdev"))
-    {
-	gamemode = shareware;
-	devparm = true;
-	D_AddFile (DEVDATA"doom1.wad");
-	D_AddFile (DEVMAPS"data_se/texture1.lmp");
-	D_AddFile (DEVMAPS"data_se/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
-    if (M_CheckParm ("-regdev"))
-    {
-	gamemode = registered;
-	devparm = true;
-	D_AddFile (DEVDATA"doom.wad");
-	D_AddFile (DEVMAPS"data_se/texture1.lmp");
-	D_AddFile (DEVMAPS"data_se/texture2.lmp");
-	D_AddFile (DEVMAPS"data_se/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
-    if (M_CheckParm ("-comdev"))
-    {
-	gamemode = commercial;
-	devparm = true;
-	/* I don't bother
-	if(plutonia)
-	    D_AddFile (DEVDATA"plutonia.wad");
-	else if(tnt)
-	    D_AddFile (DEVDATA"tnt.wad");
-	else*/
-	    D_AddFile (DEVDATA"doom2.wad");
-	    
-	D_AddFile (DEVMAPS"cdata/texture1.lmp");
-	D_AddFile (DEVMAPS"cdata/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
     if ( !access (doom2fwad,R_OK) )
     {
 	gamemode = commercial;
@@ -866,13 +815,6 @@ void D_DoomMain (void)
 
     if (devparm)
 	printf(D_DEVSTR);
-    
-    if (M_CheckParm("-cdrom"))
-    {
-	printf(D_CDROM);
-	mkdir("c:\\doomdata",0);
-	strcpy (basedefault,"c:/doomdata/default.cfg");
-    }	
     
     // turbo option
     if ( (p=M_CheckParm ("-turbo")) )

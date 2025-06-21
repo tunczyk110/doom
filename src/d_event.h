@@ -1,36 +1,22 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// DESCRIPTION:
-//
-//    
-//-----------------------------------------------------------------------------
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-
-#ifndef __D_EVENT__
-#define __D_EVENT__
-
+#pragma once
 
 #include "doomtype.h"
 
 #include <SDL3/SDL.h>
-
-//
-// Event handling.
-//
 
 // Input event types.
 typedef enum
@@ -50,7 +36,6 @@ typedef struct
     int		data3;		// mouse/joystick y move
 } event_t;
 
- 
 typedef enum
 {
     ga_nothing,
@@ -64,8 +49,6 @@ typedef enum
     ga_worlddone,
     ga_screenshot
 } gameaction_t;
-
-
 
 //
 // Button/action code definitions.
@@ -100,12 +83,6 @@ typedef enum
   
 } buttoncode_t;
 
-
-
-
-//
-// GLOBAL VARIABLES
-//
 #define MAXEVENTS		64
 
 extern  event_t		events[MAXEVENTS];
@@ -113,14 +90,3 @@ extern  int             eventhead;
 extern	int		eventtail;
 
 extern  gameaction_t    gameaction;
-
-
-event_t TranslateEvent(const SDL_Event* sdl_event);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

@@ -1,53 +1,25 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM graphics stuff for X11, UNIX.
-//
-//-----------------------------------------------------------------------------
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-static const char
-rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
-
-#include <strings.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-
-#include <stdarg.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <netinet/in.h>
-#include <errno.h>
 #include <signal.h>
 
-#include "doomstat.h"
 #include "i_system.h"
 #include "v_video.h"
-#include "m_argv.h"
 #include "d_main.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-#include "doomdef.h"
+#include "d_event.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_pixels.h>
@@ -61,7 +33,6 @@ SDL_Window* window = NULL;
 SDL_Surface* screen_buffer = NULL;
 SDL_Palette* screen_palette = NULL;
 
-SDL_Surface* argb_buffer = NULL;
 SDL_Texture* render_texture = NULL;
 
 pixel_t* screen_pixels = NULL;
@@ -76,6 +47,7 @@ static SDL_Rect blit_rect = {
 void I_ShutdownGraphics(void)
 {
     SDL_DestroySurface(screen_buffer);
+    SDL_DestroyTexture(render_texture);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
@@ -83,23 +55,21 @@ void I_ShutdownGraphics(void)
 
 void I_StartTic (void)
 {
-    if (!renderer) {
-        return;
-    }
-
     SDL_Event sdl_event;
     while (SDL_PollEvent(&sdl_event)) {
-        event_t event = TranslateEvent(&sdl_event);
-        D_PostEvent(&event);
+        if (sdl_event.type == SDL_EVENT_QUIT) {
+            I_Quit();
+        }
     }
 }
 
 void I_FinishUpdate (void)
 {
-    if (!SDL_LockTextureToSurface(render_texture, NULL, &argb_buffer)) {
+    SDL_Surface* lock_surface = NULL;
+    if (!SDL_LockTextureToSurface(render_texture, NULL, &lock_surface)) {
         I_Error("Failed to lock texture for rendering: %s", SDL_GetError());
     }
-    SDL_BlitSurfaceUnchecked(screen_buffer, &blit_rect, argb_buffer, &blit_rect);
+    SDL_BlitSurfaceUnchecked(screen_buffer, &blit_rect, lock_surface, &blit_rect);
     SDL_UnlockTexture(render_texture);
 
     SDL_RenderClear(renderer);

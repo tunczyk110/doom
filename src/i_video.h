@@ -1,35 +1,20 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// DESCRIPTION:
-//	System specific interface stuff.
-//
-//-----------------------------------------------------------------------------
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-
-#ifndef __I_VIDEO__
-#define __I_VIDEO__
-
+#pragma once
 
 #include "doomtype.h"
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 
 // Called by D_DoomMain,
 // determines the hardware configuration
@@ -44,19 +29,4 @@ void I_SetPalette (byte* palette);
 
 void I_FinishUpdate (void);
 
-// Wait for vertical retrace or pause a bit.
-void I_WaitVBL(int count);
-
 void I_ReadScreen (byte* scr);
-
-void I_BeginRead (void);
-void I_EndRead (void);
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

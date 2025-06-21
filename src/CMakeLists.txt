@@ -1,6 +1,5 @@
 target_sources(doom PRIVATE
     am_map.c
-    d_event.c
     d_items.c
     d_main.c
     d_net.c
