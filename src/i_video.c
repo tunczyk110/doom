@@ -86,21 +86,21 @@ void I_ReadScreen (byte* scr)
 
 void I_SetPalette (byte* doompalette)
 {
-    int i;
-
     if (!screen_palette) {
-        return;
+        I_Error("Error when trying to set palette; the ptr is NULL");
     }
 
-    SDL_Color* palette = screen_palette->colors;
+    SDL_Color colors[256];
 
-    for (i=0; i<256; ++i)
+    for (int i=0; i<256; ++i)
     {
-        palette[i].a = 0xFFu;
-        palette[i].r = gammatable[usegamma][*doompalette++];
-        palette[i].g = gammatable[usegamma][*doompalette++];
-        palette[i].b = gammatable[usegamma][*doompalette++];
+        colors[i].a = 0xFFu;
+        colors[i].r = gammatable[usegamma][*doompalette++];
+        colors[i].g = gammatable[usegamma][*doompalette++];
+        colors[i].b = gammatable[usegamma][*doompalette++];
     }
+
+    SDL_SetPaletteColors(screen_palette, colors, 0, 256);
 }
 
 void I_InitGraphics(void)
