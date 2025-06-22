@@ -55,11 +55,12 @@ void I_ShutdownGraphics(void)
 
 void I_StartTic (void)
 {
-    SDL_Event sdl_event;
-    while (SDL_PollEvent(&sdl_event)) {
-        if (sdl_event.type == SDL_EVENT_QUIT) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
             I_Quit();
         }
+        D_PostEvent(&event);
     }
 }
 

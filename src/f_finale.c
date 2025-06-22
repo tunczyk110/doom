@@ -1,29 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	Game completion, final screen animation.
-//
-//-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: f_finale.c,v 1.5 1997/02/03 21:26:34 b1 Exp $";
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #include <ctype.h>
 
@@ -87,7 +74,7 @@ char*	finaleflat;
 
 void	F_StartCast (void);
 void	F_CastTicker (void);
-boolean F_CastResponder (event_t *ev);
+boolean F_CastResponder (SDL_Event* ev);
 void	F_CastDrawer (void);
 
 //
@@ -192,7 +179,7 @@ void F_StartFinale (void)
 
 
 
-boolean F_Responder (event_t *event)
+boolean F_Responder (SDL_Event *event)
 {
     if (finalestage == 2)
 	return F_CastResponder (event);
@@ -499,14 +486,14 @@ void F_CastTicker (void)
 // F_CastResponder
 //
 
-boolean F_CastResponder (event_t* ev)
+boolean F_CastResponder (SDL_Event* ev)
 {
-    if (ev->type != ev_keydown)
-	return false;
-		
+    if (ev->type != SDL_EVENT_KEY_DOWN)
+        return false;
+
     if (castdeath)
-	return true;			// already in dying frames
-		
+	    return true; // already in dying frames
+
     // go into death frame
     castdeath = true;
     caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
@@ -514,8 +501,8 @@ boolean F_CastResponder (event_t* ev)
     castframes = 0;
     castattacking = false;
     if (mobjinfo[castorder[castnum].type].deathsound)
-	S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
-	
+        S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
+
     return true;
 }
 

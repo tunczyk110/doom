@@ -191,6 +191,8 @@ extern int	showMessages;
 // machine-independent sound params
 extern	int	numChannels;
 
+extern int quit_delay;
+
 
 // UNIX hack, to be removed.
 #ifdef SNDSERV
@@ -222,28 +224,19 @@ default_t	defaults[] =
     {"sfx_volume",&snd_SfxVolume, 8},
     {"music_volume",&snd_MusicVolume, 8},
     {"show_messages",&showMessages, 1},
-    
 
-#ifdef NORMALUNIX
-    {"key_right",&key_right, KEY_RIGHTARROW},
-    {"key_left",&key_left, KEY_LEFTARROW},
-    {"key_up",&key_up, KEY_UPARROW},
-    {"key_down",&key_down, KEY_DOWNARROW},
-    {"key_strafeleft",&key_strafeleft, ','},
-    {"key_straferight",&key_straferight, '.'},
+    {"key_right",&key_right, SDL_SCANCODE_E},
+    {"key_left",&key_left, SDL_SCANCODE_Q},
+    {"key_up",&key_up, SDL_SCANCODE_W},
+    {"key_down",&key_down, SDL_SCANCODE_S},
+    {"key_strafeleft",&key_strafeleft, SDL_SCANCODE_A},
+    {"key_straferight",&key_straferight, SDL_SCANCODE_D},
 
-    {"key_fire",&key_fire, KEY_RCTRL},
-    {"key_use",&key_use, ' '},
-    {"key_strafe",&key_strafe, KEY_RALT},
-    {"key_speed",&key_speed, KEY_RSHIFT},
+    {"key_fire",&key_fire, SDL_SCANCODE_LCTRL},
+    {"key_use",&key_use, SDL_SCANCODE_SPACE},
+    {"key_strafe",&key_strafe, SDL_SCANCODE_LALT},
+    {"key_speed",&key_speed, SDL_SCANCODE_LSHIFT},
 
-// UNIX hack, to be removed. 
-#ifdef SNDSERV
-    {"sndserver", (int *) &sndserver_filename, (long long int) "sndserver"},
-    {"mb_used", &mb_used, 2},
-#endif
-    
-#endif
     {"use_mouse",&usemouse, 1},
     {"mouseb_fire",&mousebfire,0},
     {"mouseb_strafe",&mousebstrafe,1},
@@ -273,7 +266,9 @@ default_t	defaults[] =
     {"chatmacro6", (int *) &chat_macros[6], (long long int) HUSTR_CHATMACRO6 },
     {"chatmacro7", (int *) &chat_macros[7], (long long int) HUSTR_CHATMACRO7 },
     {"chatmacro8", (int *) &chat_macros[8], (long long int) HUSTR_CHATMACRO8 },
-    {"chatmacro9", (int *) &chat_macros[9], (long long int) HUSTR_CHATMACRO9 }
+    {"chatmacro9", (int *) &chat_macros[9], (long long int) HUSTR_CHATMACRO9 },
+
+    {"quit_delay", &quit_delay, 0}
 
 };
 

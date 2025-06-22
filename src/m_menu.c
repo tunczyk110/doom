@@ -1,29 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-//
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
-//
-// The source is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM selection menu, options, episode etc.
-//	Sliders and icons. Kinda widget stuff.
-//
-//-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: m_menu.c,v 1.7 1997/02/03 22:45:10 b1 Exp $";
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -678,12 +665,11 @@ void M_SaveGame (int choice)
 //
 char    tempstring[80];
 
-void M_QuickSaveResponse(int ch)
+void M_QuickSaveResponse(SDL_Scancode key)
 {
-    if (ch == 'y')
-    {
-	M_DoSave(quickSaveSlot);
-	S_StartSound(NULL,sfx_swtchx);
+    if (key == SDL_SCANCODE_Y) {
+        M_DoSave(quickSaveSlot);
+        S_StartSound(NULL,sfx_swtchx);
     }
 }
 
@@ -715,12 +701,11 @@ void M_QuickSave(void)
 //
 // M_QuickLoad
 //
-void M_QuickLoadResponse(int ch)
+void M_QuickLoadResponse(SDL_Scancode key)
 {
-    if (ch == 'y')
-    {
-	M_LoadSelect(quickSaveSlot);
-	S_StartSound(NULL,sfx_swtchx);
+    if (key == SDL_SCANCODE_Y) {
+        M_LoadSelect(quickSaveSlot);
+        S_StartSound(NULL,sfx_swtchx);
     }
 }
 
@@ -895,13 +880,12 @@ void M_DrawEpisode(void)
     V_DrawPatchDirect (54,38,0,W_CacheLumpName("M_EPISOD",PU_CACHE));
 }
 
-void M_VerifyNightmare(int ch)
+void M_VerifyNightmare(SDL_Scancode key)
 {
-    if (ch != 'y')
-	return;
-		
-    G_DeferedInitNew(nightmare,epi+1,1);
-    M_ClearMenus ();
+    if (key == SDL_SCANCODE_Y) {
+        G_DeferedInitNew(nightmare,epi+1,1);
+        M_ClearMenus ();
+    }
 }
 
 void M_ChooseSkill(int choice)
@@ -993,14 +977,13 @@ void M_ChangeMessages(int choice)
 //
 // M_EndGame
 //
-void M_EndGameResponse(int ch)
+void M_EndGameResponse(SDL_Scancode key)
 {
-    if (ch != 'y')
-	return;
-		
-    currentMenu->lastOn = itemOn;
-    M_ClearMenus ();
-    D_StartTitle ();
+    if (key == SDL_SCANCODE_Y) {
+        currentMenu->lastOn = itemOn;
+        M_ClearMenus ();
+        D_StartTitle ();
+    }
 }
 
 void M_EndGame(int choice)
@@ -1075,19 +1058,20 @@ int     quitsounds2[8] =
     sfx_sgtatk
 };
 
+int quit_delay = 0;
 
-
-void M_QuitResponse(int ch)
+void M_QuitResponse(SDL_Scancode key)
 {
-    if (ch != 'y')
-	return;
-    if (!netgame)
+    if (key != SDL_SCANCODE_Y) {
+        return;
+    }
+    if (!netgame && quit_delay)
     {
-	if (gamemode == commercial)
-	    S_StartSound(NULL,quitsounds2[(gametic>>2)&7]);
-	else
-	    S_StartSound(NULL,quitsounds[(gametic>>2)&7]);
-	I_WaitVBL(105);
+        if (gamemode == commercial)
+            S_StartSound(NULL,quitsounds2[(gametic>>2)&7]);
+        else
+            S_StartSound(NULL,quitsounds[(gametic>>2)&7]);
+        I_WaitVBL(105);
     }
     I_Quit ();
 }
@@ -1343,375 +1327,259 @@ M_WriteText
 // CONTROL PANEL
 //
 
-//
-// M_Responder
-//
-boolean M_Responder (event_t* ev)
+boolean M_Responder(SDL_Event* event)
 {
-    int             ch;
-    int             i;
-    static  int     joywait = 0;
-    static  int     mousewait = 0;
-    static  int     mousey = 0;
-    static  int     lasty = 0;
-    static  int     mousex = 0;
-    static  int     lastx = 0;
-	
-    ch = -1;
-	
-    if (ev->type == ev_joystick && joywait < I_GetTime())
-    {
-	if (ev->data3 == -1)
-	{
-	    ch = KEY_UPARROW;
-	    joywait = I_GetTime() + 5;
-	}
-	else if (ev->data3 == 1)
-	{
-	    ch = KEY_DOWNARROW;
-	    joywait = I_GetTime() + 5;
-	}
-		
-	if (ev->data2 == -1)
-	{
-	    ch = KEY_LEFTARROW;
-	    joywait = I_GetTime() + 2;
-	}
-	else if (ev->data2 == 1)
-	{
-	    ch = KEY_RIGHTARROW;
-	    joywait = I_GetTime() + 2;
-	}
-		
-	if (ev->data1&1)
-	{
-	    ch = KEY_ENTER;
-	    joywait = I_GetTime() + 5;
-	}
-	if (ev->data1&2)
-	{
-	    ch = KEY_BACKSPACE;
-	    joywait = I_GetTime() + 5;
-	}
+    if (event->type != SDL_EVENT_KEY_DOWN) {
+        return false;
     }
-    else
-    {
-	if (ev->type == ev_mouse && mousewait < I_GetTime())
-	{
-	    mousey += ev->data3;
-	    if (mousey < lasty-30)
-	    {
-		ch = KEY_DOWNARROW;
-		mousewait = I_GetTime() + 5;
-		mousey = lasty -= 30;
-	    }
-	    else if (mousey > lasty+30)
-	    {
-		ch = KEY_UPARROW;
-		mousewait = I_GetTime() + 5;
-		mousey = lasty += 30;
-	    }
-		
-	    mousex += ev->data2;
-	    if (mousex < lastx-30)
-	    {
-		ch = KEY_LEFTARROW;
-		mousewait = I_GetTime() + 5;
-		mousex = lastx -= 30;
-	    }
-	    else if (mousex > lastx+30)
-	    {
-		ch = KEY_RIGHTARROW;
-		mousewait = I_GetTime() + 5;
-		mousex = lastx += 30;
-	    }
-		
-	    if (ev->data1&1)
-	    {
-		ch = KEY_ENTER;
-		mousewait = I_GetTime() + 15;
-	    }
-			
-	    if (ev->data1&2)
-	    {
-		ch = KEY_BACKSPACE;
-		mousewait = I_GetTime() + 15;
-	    }
-	}
-	else
-	    if (ev->type == ev_keydown)
-	    {
-		ch = ev->data1;
-	    }
-    }
-    
-    if (ch == -1)
-	return false;
 
-    
+    SDL_Scancode key = event->key.scancode;
+    SDL_Keymod upper = SDL_GetKeyboardState(NULL)[SDL_SCANCODE_LSHIFT];
+    char ch = SDL_GetKeyFromScancode(key, (upper ? SDL_KMOD_LSHIFT : SDL_KMOD_NONE), false);
+
     // Save Game string input
-    if (saveStringEnter)
-    {
-	switch(ch)
-	{
-	  case KEY_BACKSPACE:
-	    if (saveCharIndex > 0)
-	    {
-		saveCharIndex--;
-		savegamestrings[saveSlot][saveCharIndex] = 0;
-	    }
-	    break;
-				
-	  case KEY_ESCAPE:
-	    saveStringEnter = 0;
-	    strcpy(&savegamestrings[saveSlot][0],saveOldString);
-	    break;
-				
-	  case KEY_ENTER:
-	    saveStringEnter = 0;
-	    if (savegamestrings[saveSlot][0])
-		M_DoSave(saveSlot);
-	    break;
-				
-	  default:
-	    ch = toupper(ch);
-	    if (ch != 32)
-		if (ch-HU_FONTSTART < 0 || ch-HU_FONTSTART >= HU_FONTSIZE)
-		    break;
-	    if (ch >= 32 && ch <= 127 &&
-		saveCharIndex < SAVESTRINGSIZE-1 &&
-		M_StringWidth(savegamestrings[saveSlot]) <
-		(SAVESTRINGSIZE-2)*8)
-	    {
-		savegamestrings[saveSlot][saveCharIndex++] = ch;
-		savegamestrings[saveSlot][saveCharIndex] = 0;
-	    }
-	    break;
-	}
-	return true;
+    if (saveStringEnter) {
+        switch(key)
+        {
+        case SDL_SCANCODE_BACKSPACE:
+            if (saveCharIndex > 0) {
+                saveCharIndex--;
+                savegamestrings[saveSlot][saveCharIndex] = 0;
+            }
+            break;
+
+        case SDL_SCANCODE_ESCAPE:
+            saveStringEnter = 0;
+            strcpy(&savegamestrings[saveSlot][0],saveOldString);
+            break;
+
+        case SDL_SCANCODE_RETURN:
+            saveStringEnter = 0;
+            if (savegamestrings[saveSlot][0]) {
+                M_DoSave(saveSlot);
+            }
+            break;
+
+        default:
+            ch = toupper(ch);
+            if (ch != 32 && (ch-HU_FONTSTART < 0 || ch-HU_FONTSTART >= HU_FONTSIZE))
+                break;
+            if (ch >= 32 && ch <= 127 && saveCharIndex < SAVESTRINGSIZE-1
+                && M_StringWidth(savegamestrings[saveSlot]) < (SAVESTRINGSIZE-2)*8)
+            {
+                savegamestrings[saveSlot][saveCharIndex++] = ch;
+                savegamestrings[saveSlot][saveCharIndex] = 0;
+            }
+            break;
+        }
+        return true;
     }
-    
+
     // Take care of any messages that need input
-    if (messageToPrint)
-    {
-	if (messageNeedsInput == true &&
-	    !(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEY_ESCAPE))
-	    return false;
-		
-	menuactive = messageLastMenuActive;
-	messageToPrint = 0;
-	if (messageRoutine)
-	    messageRoutine(ch);
-			
-	menuactive = false;
-	S_StartSound(NULL,sfx_swtchx);
-	return true;
+    if (messageToPrint) {
+        if (messageNeedsInput == true &&
+            !(key == SDL_SCANCODE_SPACE ||
+            key == SDL_SCANCODE_N ||
+            key == SDL_SCANCODE_Y ||
+            key == SDL_SCANCODE_ESCAPE))
+            return false;
+
+        menuactive = messageLastMenuActive;
+        messageToPrint = 0;
+        if (messageRoutine) {
+            messageRoutine(key);
+        }
+
+        menuactive = false;
+        S_StartSound(NULL,sfx_swtchx);
+        return true;
     }
-	
-    if (devparm && ch == KEY_F1)
-    {
-	G_ScreenShot ();
-	return true;
-    }
-		
-    
+
     // F-Keys
-    if (!menuactive)
-	switch(ch)
-	{
-	  case KEY_MINUS:         // Screen size down
-	    if (automapactive || chat_on)
-		return false;
-	    M_SizeDisplay(0);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-				
-	  case KEY_EQUALS:        // Screen size up
-	    if (automapactive || chat_on)
-		return false;
-	    M_SizeDisplay(1);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-				
-	  case KEY_F1:            // Help key
-	    M_StartControlPanel ();
+    if (!menuactive) {
+        switch (key) {
+        case SDL_SCANCODE_MINUS:         // Screen size down
+            if (automapactive || chat_on)
+            return false;
+            M_SizeDisplay(0);
+            S_StartSound(NULL,sfx_stnmov);
+            return true;
 
-	    if ( gamemode == retail )
-	      currentMenu = &ReadDef2;
-	    else
-	      currentMenu = &ReadDef1;
-	    
-	    itemOn = 0;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F2:            // Save
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_SaveGame(0);
-	    return true;
-				
-	  case KEY_F3:            // Load
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_LoadGame(0);
-	    return true;
-				
-	  case KEY_F4:            // Sound Volume
-	    M_StartControlPanel ();
-	    currentMenu = &SoundDef;
-	    itemOn = sfx_vol;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F5:            // Detail toggle
-	    M_ChangeDetail(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F6:            // Quicksave
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickSave();
-	    return true;
-				
-	  case KEY_F7:            // End game
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_EndGame(0);
-	    return true;
-				
-	  case KEY_F8:            // Toggle messages
-	    M_ChangeMessages(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-				
-	  case KEY_F9:            // Quickload
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickLoad();
-	    return true;
-				
-	  case KEY_F10:           // Quit DOOM
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuitDOOM(0);
-	    return true;
-				
-	  case KEY_F11:           // gamma toggle
-	    usegamma++;
-	    if (usegamma > 4)
-		usegamma = 0;
-	    players[consoleplayer].message = gammamsg[usegamma];
-	    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-	    return true;
-				
-	}
+        case SDL_SCANCODE_EQUALS:        // Screen size up
+            if (automapactive || chat_on)
+            return false;
+            M_SizeDisplay(1);
+            S_StartSound(NULL,sfx_stnmov);
+            return true;
 
-    
+        case SDL_SCANCODE_F1:            // Help key
+            M_StartControlPanel ();
+
+            if ( gamemode == retail )
+            currentMenu = &ReadDef2;
+            else
+            currentMenu = &ReadDef1;
+
+            itemOn = 0;
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+
+        case SDL_SCANCODE_F2:            // Save
+            M_StartControlPanel();
+            S_StartSound(NULL,sfx_swtchn);
+            M_SaveGame(0);
+            return true;
+
+        case SDL_SCANCODE_F3:            // Load
+            M_StartControlPanel();
+            S_StartSound(NULL,sfx_swtchn);
+            M_LoadGame(0);
+            return true;
+
+        case SDL_SCANCODE_F4:            // Sound Volume
+            M_StartControlPanel ();
+            currentMenu = &SoundDef;
+            itemOn = sfx_vol;
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+
+        case SDL_SCANCODE_F5:            // Detail toggle
+            M_ChangeDetail(0);
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+
+        case SDL_SCANCODE_F6:            // Quicksave
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuickSave();
+            return true;
+
+        case SDL_SCANCODE_F7:            // End game
+            S_StartSound(NULL,sfx_swtchn);
+            M_EndGame(0);
+            return true;
+
+        case SDL_SCANCODE_F8:            // Toggle messages
+            M_ChangeMessages(0);
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+
+        case SDL_SCANCODE_F9:            // Quickload
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuickLoad();
+            return true;
+
+        case SDL_SCANCODE_F10:           // Quit DOOM
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuitDOOM(0);
+            return true;
+
+        case SDL_SCANCODE_F11:           // gamma toggle
+            usegamma++;
+            if (usegamma > 4)
+            usegamma = 0;
+            players[consoleplayer].message = gammamsg[usegamma];
+            I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+            return true;
+        }
+    }
+
+
     // Pop-up menu?
-    if (!menuactive)
-    {
-	if (ch == KEY_ESCAPE)
-	{
-	    M_StartControlPanel ();
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-	}
-	return false;
+    if (!menuactive) {
+        if (key == SDL_SCANCODE_ESCAPE) {
+            M_StartControlPanel ();
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+        }
+        return false;
     }
 
-    
+
     // Keys usable within menu
-    switch (ch)
-    {
-      case KEY_DOWNARROW:
-	do
-	{
-	    if (itemOn+1 > currentMenu->numitems-1)
-		itemOn = 0;
-	    else itemOn++;
-	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
-	return true;
-		
-      case KEY_UPARROW:
-	do
-	{
-	    if (!itemOn)
-		itemOn = currentMenu->numitems-1;
-	    else itemOn--;
-	    S_StartSound(NULL,sfx_pstop);
-	} while(currentMenu->menuitems[itemOn].status==-1);
-	return true;
+    switch (key) {
+        case SDL_SCANCODE_DOWN:
+            do {
+                if (itemOn+1 > currentMenu->numitems-1)
+                    itemOn = 0;
+                else
+                    itemOn++;
+                S_StartSound(NULL,sfx_pstop);
+            } while(currentMenu->menuitems[itemOn].status==-1);
+            return true;
 
-      case KEY_LEFTARROW:
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status == 2)
-	{
-	    S_StartSound(NULL,sfx_stnmov);
-	    currentMenu->menuitems[itemOn].routine(0);
-	}
-	return true;
-		
-      case KEY_RIGHTARROW:
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status == 2)
-	{
-	    S_StartSound(NULL,sfx_stnmov);
-	    currentMenu->menuitems[itemOn].routine(1);
-	}
-	return true;
+        case SDL_SCANCODE_UP:
+            do {
+                if (!itemOn)
+                    itemOn = currentMenu->numitems-1;
+                else
+                    itemOn--;
+                S_StartSound(NULL,sfx_pstop);
+            } while(currentMenu->menuitems[itemOn].status==-1);
+            return true;
 
-      case KEY_ENTER:
-	if (currentMenu->menuitems[itemOn].routine &&
-	    currentMenu->menuitems[itemOn].status)
-	{
-	    currentMenu->lastOn = itemOn;
-	    if (currentMenu->menuitems[itemOn].status == 2)
-	    {
-		currentMenu->menuitems[itemOn].routine(1);      // right arrow
-		S_StartSound(NULL,sfx_stnmov);
-	    }
-	    else
-	    {
-		currentMenu->menuitems[itemOn].routine(itemOn);
-		S_StartSound(NULL,sfx_pistol);
-	    }
-	}
-	return true;
-		
-      case KEY_ESCAPE:
-	currentMenu->lastOn = itemOn;
-	M_ClearMenus ();
-	S_StartSound(NULL,sfx_swtchx);
-	return true;
-		
-      case KEY_BACKSPACE:
-	currentMenu->lastOn = itemOn;
-	if (currentMenu->prevMenu)
-	{
-	    currentMenu = currentMenu->prevMenu;
-	    itemOn = currentMenu->lastOn;
-	    S_StartSound(NULL,sfx_swtchn);
-	}
-	return true;
-	
-      default:
-	for (i = itemOn+1;i < currentMenu->numitems;i++)
-	    if (currentMenu->menuitems[i].alphaKey == ch)
-	    {
-		itemOn = i;
-		S_StartSound(NULL,sfx_pstop);
-		return true;
-	    }
-	for (i = 0;i <= itemOn;i++)
-	    if (currentMenu->menuitems[i].alphaKey == ch)
-	    {
-		itemOn = i;
-		S_StartSound(NULL,sfx_pstop);
-		return true;
-	    }
-	break;
-	
+        case SDL_SCANCODE_LEFT:
+            if (currentMenu->menuitems[itemOn].routine &&
+                currentMenu->menuitems[itemOn].status == 2)
+            {
+                S_StartSound(NULL,sfx_stnmov);
+                currentMenu->menuitems[itemOn].routine(0);
+            }
+            return true;
+
+        case SDL_SCANCODE_RIGHT:
+            if (currentMenu->menuitems[itemOn].routine &&
+                currentMenu->menuitems[itemOn].status == 2)
+            {
+                S_StartSound(NULL,sfx_stnmov);
+                currentMenu->menuitems[itemOn].routine(1);
+            }
+            return true;
+
+        case SDL_SCANCODE_RETURN:
+            if (currentMenu->menuitems[itemOn].routine &&
+                currentMenu->menuitems[itemOn].status)
+            {
+                currentMenu->lastOn = itemOn;
+                if (currentMenu->menuitems[itemOn].status == 2) {
+                    currentMenu->menuitems[itemOn].routine(1);      // right arrow
+                    S_StartSound(NULL,sfx_stnmov);
+                } else {
+                    currentMenu->menuitems[itemOn].routine(itemOn);
+                    S_StartSound(NULL,sfx_pistol);
+                }
+            }
+            return true;
+
+        case SDL_SCANCODE_ESCAPE:
+            currentMenu->lastOn = itemOn;
+            M_ClearMenus ();
+            S_StartSound(NULL,sfx_swtchx);
+            return true;
+
+        case SDL_SCANCODE_BACKSPACE:
+            currentMenu->lastOn = itemOn;
+            if (currentMenu->prevMenu) {
+                currentMenu = currentMenu->prevMenu;
+                itemOn = currentMenu->lastOn;
+                S_StartSound(NULL,sfx_swtchn);
+            }
+            return true;
+
+         default:
+            for (int i = itemOn+1;i < currentMenu->numitems;i++)
+                if (currentMenu->menuitems[i].alphaKey == ch) {
+                    itemOn = i;
+                    S_StartSound(NULL,sfx_pstop);
+                    return true;
+                }
+            for (int i = 0;i <= itemOn;i++)
+                if (currentMenu->menuitems[i].alphaKey == ch) {
+                    itemOn = i;
+                    S_StartSound(NULL,sfx_pstop);
+                    return true;
+                }
+            break;
     }
-
     return false;
 }
 

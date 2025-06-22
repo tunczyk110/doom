@@ -1,33 +1,21 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:  none
-//
-//-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: g_game.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #include <string.h>
 #include <stdlib.h>
 
-#include "doomdef.h" 
+#include "doomdef.h"
 #include "doomstat.h"
 
 #include "z_zone.h"
@@ -54,7 +42,7 @@ rcsid[] = "$Id: g_game.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 
 #include "w_wad.h"
 
-#include "p_local.h" 
+#include "p_local.h"
 
 #include "s_sound.h"
 
@@ -178,7 +166,7 @@ fixed_t		angleturn[3] = {640, 1280, 320};	// + slow turn
 
 #define SLOWTURNTICS	6 
  
-#define NUMKEYS		256 
+#define NUMKEYS	SDL_SCANCODE_COUNT
 
 boolean         gamekeydown[NUMKEYS]; 
 int             turnheld;				// for accelerative turning 
@@ -340,7 +328,7 @@ void G_BuildTiccmd (ticcmd_t* cmd)
 
     // chainsaw overrides 
     for (i=0 ; i<NUMWEAPONS-1 ; i++)        
-	if (gamekeydown['1'+i]) 
+	if (gamekeydown[SDL_SCANCODE_1+i]) 
 	{ 
 	    cmd->buttons |= BT_CHANGE; 
 	    cmd->buttons |= i<<BT_WEAPONSHIFT; 
@@ -495,109 +483,95 @@ void G_DoLoadLevel (void)
     memset (mousebuttons, 0, sizeof(mousebuttons)); 
     memset (joybuttons, 0, sizeof(joybuttons)); 
 } 
- 
- 
-//
-// G_Responder  
-// Get info needed to make ticcmd_ts for the players.
-// 
-boolean G_Responder (event_t* ev) 
-{ 
+
+boolean G_Responder (SDL_Event* ev)
+{
     // allow spy mode changes even during the demo
-    if (gamestate == GS_LEVEL && ev->type == ev_keydown 
-	&& ev->data1 == KEY_F12 && (singledemo || !deathmatch) )
-    {
-	// spy mode 
-	do 
-	{ 
-	    displayplayer++; 
-	    if (displayplayer == MAXPLAYERS) 
-		displayplayer = 0; 
-	} while (!playeringame[displayplayer] && displayplayer != consoleplayer); 
-	return true; 
+    if (gamestate == GS_LEVEL && ev->type == SDL_EVENT_KEY_DOWN
+        && ev->key.scancode == SDL_SCANCODE_F12 && (singledemo || !deathmatch) ) {
+        // spy mode
+        do
+        {
+            displayplayer++;
+            if (displayplayer == MAXPLAYERS)
+            displayplayer = 0;
+        } while (!playeringame[displayplayer] && displayplayer != consoleplayer);
+
+        return true;
     }
-    
+
     // any other key pops up menu if in demos
-    if (gameaction == ga_nothing && !singledemo && 
-	(demoplayback || gamestate == GS_DEMOSCREEN) 
-	) 
-    { 
-	if (ev->type == ev_keydown ||  
-	    (ev->type == ev_mouse && ev->data1) || 
-	    (ev->type == ev_joystick && ev->data1) ) 
-	{ 
-	    M_StartControlPanel (); 
-	    return true; 
-	} 
-	return false; 
-    } 
- 
-    if (gamestate == GS_LEVEL) 
-    { 
-#if 0 
-	if (devparm && ev->type == ev_keydown && ev->data1 == ';') 
-	{ 
-	    G_DeathMatchSpawnPlayer (0); 
-	    return true; 
-	} 
-#endif 
-	if (HU_Responder (ev)) 
-	    return true;	// chat ate the event 
-	if (ST_Responder (ev)) 
-	    return true;	// status window ate it 
-	if (AM_Responder (ev)) 
-	    return true;	// automap ate it 
-    } 
-	 
-    if (gamestate == GS_FINALE) 
-    { 
-	if (F_Responder (ev)) 
-	    return true;	// finale ate the event 
-    } 
-	 
-    switch (ev->type) 
-    { 
-      case ev_keydown: 
-	if (ev->data1 == KEY_PAUSE) 
-	{ 
-	    sendpause = true; 
-	    return true; 
-	} 
-	if (ev->data1 <NUMKEYS) 
-	    gamekeydown[ev->data1] = true; 
-	return true;    // eat key down events 
- 
-      case ev_keyup: 
-	if (ev->data1 <NUMKEYS) 
-	    gamekeydown[ev->data1] = false; 
-	return false;   // always let key up events filter down 
-		 
-      case ev_mouse: 
-	mousebuttons[0] = ev->data1 & 1; 
-	mousebuttons[1] = ev->data1 & 2; 
-	mousebuttons[2] = ev->data1 & 4; 
-	mousex = ev->data2*(mouseSensitivity+5)/10; 
-	mousey = ev->data3*(mouseSensitivity+5)/10; 
-	return true;    // eat events 
- 
-      case ev_joystick: 
-	joybuttons[0] = ev->data1 & 1; 
-	joybuttons[1] = ev->data1 & 2; 
-	joybuttons[2] = ev->data1 & 4; 
-	joybuttons[3] = ev->data1 & 8; 
-	joyxmove = ev->data2; 
-	joyymove = ev->data3; 
-	return true;    // eat events 
- 
-      default: 
-	break; 
-    } 
- 
-    return false; 
-} 
- 
- 
- 
+    if (gameaction == ga_nothing && !singledemo &&
+        (demoplayback || gamestate == GS_DEMOSCREEN)) {
+        if (ev->type == SDL_EVENT_KEY_DOWN ||
+            ev->type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
+            ev->type == SDL_EVENT_JOYSTICK_BUTTON_DOWN) {
+            M_StartControlPanel ();
+            return true;
+        }
+        return false;
+    }
+
+    if (gamestate == GS_LEVEL) {
+        if (HU_Responder (ev)) {
+            return true;
+        }
+        if (ST_Responder (ev)) {
+            return true;
+        }
+        if (AM_Responder (ev)) {
+            return true;
+        }
+    }
+
+    if (gamestate == GS_FINALE) {
+        if (F_Responder (ev)) {
+            return true;
+        }
+    }
+
+    switch (ev->type) {
+        case SDL_EVENT_KEY_DOWN:
+        if (ev->key.scancode == SDL_SCANCODE_PAUSE) {
+            sendpause = true;
+            return true;
+        }
+        if (ev->key.scancode < NUMKEYS)
+            gamekeydown[ev->key.scancode] = true;
+        return true;    // eat key down events
+
+        case SDL_EVENT_KEY_UP:
+        if (ev->key.scancode < NUMKEYS)
+            gamekeydown[ev->key.scancode] = false;
+        return false;   // always let key up events filter down
+
+        // case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        // case SDL_EVENT_MOUSE_BUTTON_UP:
+        //     mousebuttons[ev->button.button] = ev->button.down;
+        //     return true;
+
+        // case SDL_EVENT_MOUSE_MOTION:
+        //     mousex = ev->motion.xrel * (mouseSensitivity+5);
+        //     mousey = ev->motion.yrel * -(mouseSensitivity+5);
+        //     return true;
+
+        // case ev_joystick: 
+        // joybuttons[0] = ev->data1 & 1; 
+        // joybuttons[1] = ev->data1 & 2; 
+        // joybuttons[2] = ev->data1 & 4; 
+        // joybuttons[3] = ev->data1 & 8; 
+        // joyxmove = ev->data2; 
+        // joyymove = ev->data3; 
+        // return true;    // eat events 
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+
 //
 // G_Ticker
 // Make ticcmd_ts for the players.

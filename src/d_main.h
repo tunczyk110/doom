@@ -1,44 +1,25 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	System specific interface stuff.
-//
-//-----------------------------------------------------------------------------
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-
-#ifndef __D_MAIN__
-#define __D_MAIN__
+#pragma once
 
 #include "d_event.h"
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-
-#define MAXWADFILES             20
-extern char*		wadfiles[MAXWADFILES];
+#define MAXWADFILES 20
+extern char* wadfiles[MAXWADFILES];
 
 void D_AddFile (char *file);
-
-
 
 //
 // D_DoomMain()
@@ -49,9 +30,7 @@ void D_AddFile (char *file);
 void D_DoomMain (void);
 
 // Called by IO functions when input is detected.
-void D_PostEvent (event_t* ev);
-
-	
+void D_PostEvent (SDL_Event* ev);
 
 //
 // BASE LEVEL
@@ -60,5 +39,3 @@ void D_PageTicker (void);
 void D_PageDrawer (void);
 void D_AdvanceDemo (void);
 void D_StartTitle (void);
-
-#endif

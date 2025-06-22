@@ -1,29 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	Cheat sequence checking.
-//
-//-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: m_cheat.c,v 1.1 1997/02/03 21:24:34 b1 Exp $";
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #include "m_cheat.h"
 
@@ -39,11 +26,10 @@ static unsigned char	cheat_xlate_table[256];
 // Called in st_stuff module, which handles the input.
 // Returns a 1 if the cheat was successful, 0 if failed.
 //
-int
-cht_CheckCheat
-( cheatseq_t*	cht,
-  char		key )
+int cht_CheckCheat(cheatseq_t*	cht, SDL_Scancode key)
 {
+    char ch = SDL_GetKeyFromScancode(key, SDL_KMOD_NONE, false);
+
     int i;
     int rc = 0;
 
@@ -57,9 +43,9 @@ cht_CheckCheat
 	cht->p = cht->sequence; // initialize if first time
 
     if (*cht->p == 0)
-	*(cht->p++) = key;
+	*(cht->p++) = ch;
     else if
-	(cheat_xlate_table[(unsigned char)key] == *cht->p) cht->p++;
+	(cheat_xlate_table[(unsigned char)ch] == *cht->p) cht->p++;
     else
 	cht->p = cht->sequence;
 

@@ -1,30 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-//
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
-//
-// The source is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	Status bar code.
-//	Does the face/direction indicator animatin.
-//	Does palette indicators as well (red pain/berserk, bright pickup)
-//
-//-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 
 #include <stdio.h>
@@ -514,212 +500,203 @@ void ST_refreshBackground(void)
 
 // Respond to keyboard input events,
 //  intercept cheats.
-boolean
-ST_Responder (event_t* ev)
+boolean ST_Responder(SDL_Event* ev)
 {
-  int		i;
-    
+    int i;
   // Filter automap on/off.
-  if (ev->type == ev_keyup
-      && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
-  {
-    switch(ev->data1)
-    {
-      case AM_MSGENTERED:
-	st_gamestate = AutomapState;
-	st_firsttime = true;
-	break;
+  if (ev->type == SDL_EVENT_KEY_UP) {
+//       && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
+//   {
+//     switch(ev->data1)
+//     {
+//       case AM_MSGENTERED:
+// 	st_gamestate = AutomapState;
+// 	st_firsttime = true;
+// 	break;
 	
-      case AM_MSGEXITED:
-	//	fprintf(stderr, "AM exited\n");
-	st_gamestate = FirstPersonState;
-	break;
-    }
-  }
+//       case AM_MSGEXITED:
+// 	//	fprintf(stderr, "AM exited\n");
+// 	st_gamestate = FirstPersonState;
+// 	break;
+//     }
+    } else if (ev->type == SDL_EVENT_KEY_DOWN) {
+        if (!netgame) {
+            // b. - enabled for more debug fun.
+            // if (gameskill != sk_nightmare) {
 
-  // if a user keypress...
-  else if (ev->type == ev_keydown)
-  {
-    if (!netgame)
-    {
-      // b. - enabled for more debug fun.
-      // if (gameskill != sk_nightmare) {
-      
-      // 'dqd' cheat for toggleable god mode
-      if (cht_CheckCheat(&cheat_god, ev->data1))
-      {
-	plyr->cheats ^= CF_GODMODE;
-	if (plyr->cheats & CF_GODMODE)
-	{
-	  if (plyr->mo)
-	    plyr->mo->health = 100;
-	  
-	  plyr->health = 100;
-	  plyr->message = STSTR_DQDON;
-	}
-	else 
-	  plyr->message = STSTR_DQDOFF;
-      }
-      // 'fa' cheat for killer fucking arsenal
-      else if (cht_CheckCheat(&cheat_ammonokey, ev->data1))
-      {
-	plyr->armorpoints = 200;
-	plyr->armortype = 2;
-	
-	for (i=0;i<NUMWEAPONS;i++)
-	  plyr->weaponowned[i] = true;
-	
-	for (i=0;i<NUMAMMO;i++)
-	  plyr->ammo[i] = plyr->maxammo[i];
-	
-	plyr->message = STSTR_FAADDED;
-      }
-      // 'kfa' cheat for key full ammo
-      else if (cht_CheckCheat(&cheat_ammo, ev->data1))
-      {
-	plyr->armorpoints = 200;
-	plyr->armortype = 2;
-	
-	for (i=0;i<NUMWEAPONS;i++)
-	  plyr->weaponowned[i] = true;
-	
-	for (i=0;i<NUMAMMO;i++)
-	  plyr->ammo[i] = plyr->maxammo[i];
-	
-	for (i=0;i<NUMCARDS;i++)
-	  plyr->cards[i] = true;
-	
-	plyr->message = STSTR_KFAADDED;
-      }
-      // 'mus' cheat for changing music
-      else if (cht_CheckCheat(&cheat_mus, ev->data1))
-      {
-	
-	char	buf[3];
-	int		musnum;
-	
-	plyr->message = STSTR_MUS;
-	cht_GetParam(&cheat_mus, buf);
-	
-	if (gamemode == commercial)
-	{
-	  musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
-	  
-	  if (((buf[0]-'0')*10 + buf[1]-'0') > 35)
-	    plyr->message = STSTR_NOMUS;
-	  else
-	    S_ChangeMusic(musnum, 1);
-	}
-	else
-	{
-	  musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
-	  
-	  if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
-	    plyr->message = STSTR_NOMUS;
-	  else
-	    S_ChangeMusic(musnum, 1);
-	}
-      }
-      // Simplified, accepting both "noclip" and "idspispopd".
-      // no clipping mode cheat
-      else if ( cht_CheckCheat(&cheat_noclip, ev->data1) 
-		|| cht_CheckCheat(&cheat_commercial_noclip,ev->data1) )
-      {	
-	plyr->cheats ^= CF_NOCLIP;
-	
-	if (plyr->cheats & CF_NOCLIP)
-	  plyr->message = STSTR_NCON;
-	else
-	  plyr->message = STSTR_NCOFF;
-      }
-      // 'behold?' power-up cheats
-      for (i=0;i<6;i++)
-      {
-	if (cht_CheckCheat(&cheat_powerup[i], ev->data1))
-	{
-	  if (!plyr->powers[i])
-	    P_GivePower( plyr, i);
-	  else if (i!=pw_strength)
-	    plyr->powers[i] = 1;
-	  else
-	    plyr->powers[i] = 0;
-	  
-	  plyr->message = STSTR_BEHOLDX;
-	}
-      }
-      
-      // 'behold' power-up menu
-      if (cht_CheckCheat(&cheat_powerup[6], ev->data1))
-      {
-	plyr->message = STSTR_BEHOLD;
-      }
-      // 'choppers' invulnerability & chainsaw
-      else if (cht_CheckCheat(&cheat_choppers, ev->data1))
-      {
-	plyr->weaponowned[wp_chainsaw] = true;
-	plyr->powers[pw_invulnerability] = true;
-	plyr->message = STSTR_CHOPPERS;
-      }
-      // 'mypos' for player position
-      else if (cht_CheckCheat(&cheat_mypos, ev->data1))
-      {
-	static char	buf[ST_MSGWIDTH];
-	sprintf(buf, "ang=0x%x;x,y=(0x%x,0x%x)",
-		players[consoleplayer].mo->angle,
-		players[consoleplayer].mo->x,
-		players[consoleplayer].mo->y);
-	plyr->message = buf;
-      }
-    }
-    
-    // 'clev' change-level cheat
-    if (cht_CheckCheat(&cheat_clev, ev->data1))
-    {
-      char		buf[3];
-      int		epsd;
-      int		map;
-      
-      cht_GetParam(&cheat_clev, buf);
-      
-      if (gamemode == commercial)
-      {
-	epsd = 0;
-	map = (buf[0] - '0')*10 + buf[1] - '0';
-      }
-      else
-      {
-	epsd = buf[0] - '0';
-	map = buf[1] - '0';
-      }
+            // 'dqd' cheat for toggleable god mode
+            if (cht_CheckCheat(&cheat_god, ev->key.scancode)) {
+                plyr->cheats ^= CF_GODMODE;
+                if (plyr->cheats & CF_GODMODE) {
+                    if (plyr->mo)
+                        plyr->mo->health = 100;
 
-      // Catch invalid maps.
-      if (epsd < 1)
-	return false;
+                    plyr->health = 100;
+                    plyr->message = STSTR_DQDON;
+                }
+                else
+                plyr->message = STSTR_DQDOFF;
+            }
+            // 'fa' cheat for killer fucking arsenal
+            else if (cht_CheckCheat(&cheat_ammonokey, ev->key.scancode))
+            {
+            plyr->armorpoints = 200;
+            plyr->armortype = 2;
 
-      if (map < 1)
-	return false;
-      
-      // Ohmygod - this is not going to work.
-      if ((gamemode == retail)
-	  && ((epsd > 4) || (map > 9)))
-	return false;
+            for (i=0;i<NUMWEAPONS;i++)
+            plyr->weaponowned[i] = true;
 
-      if ((gamemode == registered)
-	  && ((epsd > 3) || (map > 9)))
-	return false;
+            for (i=0;i<NUMAMMO;i++)
+            plyr->ammo[i] = plyr->maxammo[i];
 
-      if ((gamemode == shareware)
-	  && ((epsd > 1) || (map > 9)))
-	return false;
+            plyr->message = STSTR_FAADDED;
+            }
+            // 'kfa' cheat for key full ammo
+            else if (cht_CheckCheat(&cheat_ammo, ev->key.scancode))
+            {
+            plyr->armorpoints = 200;
+            plyr->armortype = 2;
 
-      if ((gamemode == commercial)
-	&& (( epsd > 1) || (map > 34)))
-	return false;
+            for (i=0;i<NUMWEAPONS;i++)
+            plyr->weaponowned[i] = true;
 
-      // So be it.
-      plyr->message = STSTR_CLEV;
-      G_DeferedInitNew(gameskill, epsd, map);
-    }    
+            for (i=0;i<NUMAMMO;i++)
+            plyr->ammo[i] = plyr->maxammo[i];
+
+            for (i=0;i<NUMCARDS;i++)
+            plyr->cards[i] = true;
+
+            plyr->message = STSTR_KFAADDED;
+            }
+            // 'mus' cheat for changing music
+            else if (cht_CheckCheat(&cheat_mus, ev->key.scancode))
+            {
+            
+            char	buf[3];
+            int		musnum;
+            
+            plyr->message = STSTR_MUS;
+            cht_GetParam(&cheat_mus, buf);
+            
+            if (gamemode == commercial)
+            {
+            musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
+            
+            if (((buf[0]-'0')*10 + buf[1]-'0') > 35)
+                plyr->message = STSTR_NOMUS;
+            else
+                S_ChangeMusic(musnum, 1);
+            }
+            else
+            {
+            musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
+            
+            if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
+                plyr->message = STSTR_NOMUS;
+            else
+                S_ChangeMusic(musnum, 1);
+            }
+            }
+            // Simplified, accepting both "noclip" and "idspispopd".
+            // no clipping mode cheat
+            else if ( cht_CheckCheat(&cheat_noclip, ev->key.scancode) 
+                || cht_CheckCheat(&cheat_commercial_noclip,ev->key.scancode) )
+            {	
+            plyr->cheats ^= CF_NOCLIP;
+            
+            if (plyr->cheats & CF_NOCLIP)
+            plyr->message = STSTR_NCON;
+            else
+            plyr->message = STSTR_NCOFF;
+            }
+            // 'behold?' power-up cheats
+            for (i=0;i<6;i++)
+            {
+            if (cht_CheckCheat(&cheat_powerup[i], ev->key.scancode))
+            {
+            if (!plyr->powers[i])
+                P_GivePower( plyr, i);
+            else if (i!=pw_strength)
+                plyr->powers[i] = 1;
+            else
+                plyr->powers[i] = 0;
+            
+            plyr->message = STSTR_BEHOLDX;
+            }
+            }
+            
+            // 'behold' power-up menu
+            if (cht_CheckCheat(&cheat_powerup[6], ev->key.scancode))
+            {
+            plyr->message = STSTR_BEHOLD;
+            }
+            // 'choppers' invulnerability & chainsaw
+            else if (cht_CheckCheat(&cheat_choppers, ev->key.scancode))
+            {
+            plyr->weaponowned[wp_chainsaw] = true;
+            plyr->powers[pw_invulnerability] = true;
+            plyr->message = STSTR_CHOPPERS;
+            }
+            // 'mypos' for player position
+            else if (cht_CheckCheat(&cheat_mypos, ev->key.scancode))
+            {
+            static char	buf[ST_MSGWIDTH];
+            sprintf(buf, "ang=0x%x;x,y=(0x%x,0x%x)",
+                players[consoleplayer].mo->angle,
+                players[consoleplayer].mo->x,
+                players[consoleplayer].mo->y);
+            plyr->message = buf;
+            }
+        }
+        
+        // 'clev' change-level cheat
+        if (cht_CheckCheat(&cheat_clev, ev->key.scancode))
+        {
+        char		buf[3];
+        int		epsd;
+        int		map;
+        
+        cht_GetParam(&cheat_clev, buf);
+        
+        if (gamemode == commercial)
+        {
+        epsd = 0;
+        map = (buf[0] - '0')*10 + buf[1] - '0';
+        }
+        else
+        {
+        epsd = buf[0] - '0';
+        map = buf[1] - '0';
+        }
+
+        // Catch invalid maps.
+        if (epsd < 1)
+        return false;
+
+        if (map < 1)
+        return false;
+        
+        // Ohmygod - this is not going to work.
+        if ((gamemode == retail)
+        && ((epsd > 4) || (map > 9)))
+        return false;
+
+        if ((gamemode == registered)
+        && ((epsd > 3) || (map > 9)))
+        return false;
+
+        if ((gamemode == shareware)
+        && ((epsd > 1) || (map > 9)))
+        return false;
+
+        if ((gamemode == commercial)
+        && (( epsd > 1) || (map > 34)))
+        return false;
+
+        // So be it.
+        plyr->message = STSTR_CLEV;
+        G_DeferedInitNew(gameskill, epsd, map);
+        }    
   }
   return false;
 }
