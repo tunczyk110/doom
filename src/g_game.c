@@ -25,6 +25,7 @@
 #include "m_menu.h"
 #include "m_random.h"
 #include "i_system.h"
+#include "i_video.h"
 
 #include "p_setup.h"
 #include "p_saveg.h"
@@ -153,6 +154,8 @@ int             joybfire;
 int             joybstrafe; 
 int             joybuse; 
 int             joybspeed; 
+
+int novert;
  
  
  
@@ -390,7 +393,9 @@ void G_BuildTiccmd (ticcmd_t* cmd)
 	} 
     } 
  
-    forward += mousey; 
+    if (!novert) {
+        forward -= mousey;
+    }
     if (strafe) 
 	side += mousex*2; 
     else 
@@ -531,7 +536,7 @@ boolean G_Responder (SDL_Event* ev)
     }
 
     switch (ev->type) {
-        case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_DOWN:
         if (ev->key.scancode == SDL_SCANCODE_PAUSE) {
             sendpause = true;
             return true;
@@ -540,20 +545,21 @@ boolean G_Responder (SDL_Event* ev)
             gamekeydown[ev->key.scancode] = true;
         return true;    // eat key down events
 
-        case SDL_EVENT_KEY_UP:
+    case SDL_EVENT_KEY_UP:
         if (ev->key.scancode < NUMKEYS)
             gamekeydown[ev->key.scancode] = false;
         return false;   // always let key up events filter down
 
-        // case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        // case SDL_EVENT_MOUSE_BUTTON_UP:
-        //     mousebuttons[ev->button.button] = ev->button.down;
-        //     return true;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        mousebuttons[ev->button.button] = ev->button.down;
+        return true;
 
-        // case SDL_EVENT_MOUSE_MOTION:
-        //     mousex = ev->motion.xrel * (mouseSensitivity+5);
-        //     mousey = ev->motion.yrel * -(mouseSensitivity+5);
-        //     return true;
+    case SDL_EVENT_MOUSE_MOTION:
+        mousex = ev->motion.xrel * 2 * (mouseSensitivity+5) / 10;
+        mousey = ev->motion.yrel * 2 * (mouseSensitivity+5) / 10;
+        SDL_WarpMouseInWindow(window, SCREENWIDTH / 2, SCREENHEIGHT / 2);
+        return true;
 
         // case ev_joystick: 
         // joybuttons[0] = ev->data1 & 1; 
@@ -564,8 +570,8 @@ boolean G_Responder (SDL_Event* ev)
         // joyymove = ev->data3; 
         // return true;    // eat events 
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return false;
@@ -1479,7 +1485,7 @@ void G_ReadDemoTiccmd (ticcmd_t* cmd)
 
 void G_WriteDemoTiccmd (ticcmd_t* cmd) 
 { 
-    if (gamekeydown['q'])           // press q to end demo recording 
+    if (gamekeydown[SDL_SCANCODE_Q])           // press q to end demo recording 
 	G_CheckDemoStatus (); 
     *demo_p++ = cmd->forwardmove; 
     *demo_p++ = cmd->sidemove; 

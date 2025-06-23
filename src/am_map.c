@@ -445,8 +445,8 @@ void AM_initVariables(void)
 {
     int pnum;
     static SDL_Event st_notify = {
-        .type = SDL_EVENT_KEY_UP,
         .key = {
+            .type = SDL_EVENT_KEY_UP,
             .scancode = AM_MSGENTERED
         }
     };
@@ -551,8 +551,8 @@ void AM_LevelInit(void)
 void AM_Stop (void)
 {
     static SDL_Event st_notify = {
-        .type = SDL_EVENT_KEY_UP,
         .key = {
+            .type = SDL_EVENT_KEY_UP,
             .scancode = AM_MSGEXITED
         }
     };

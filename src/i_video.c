@@ -60,7 +60,21 @@ void I_StartTic (void)
         if (event.type == SDL_EVENT_QUIT) {
             I_Quit();
         }
-        D_PostEvent(&event);
+        if (event.type != SDL_EVENT_MOUSE_MOTION) {
+            D_PostEvent(&event);
+        }
+    }
+    float x, y;
+    SDL_GetRelativeMouseState(&x, &y);
+    if (x > 0.0005f || x < -0.0005f || y > 0.0005f || y < -0.0005f) {
+        SDL_Event mouse_motion = {
+            .motion = {
+                .type = SDL_EVENT_MOUSE_MOTION,
+                .xrel = x,
+                .yrel = y
+            }
+        };
+        D_PostEvent(&mouse_motion);
     }
 }
 
@@ -138,4 +152,7 @@ void I_InitGraphics(void)
 
     byte* doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
     I_SetPalette(doompal);
+
+    SDL_SetWindowMouseGrab(window, true);
+    SDL_HideCursor();
 }

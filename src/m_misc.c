@@ -192,6 +192,7 @@ extern int	showMessages;
 extern	int	numChannels;
 
 extern int quit_delay;
+extern int novert;
 
 
 // UNIX hack, to be removed.
@@ -238,9 +239,10 @@ default_t	defaults[] =
     {"key_speed",&key_speed, SDL_SCANCODE_LSHIFT},
 
     {"use_mouse",&usemouse, 1},
-    {"mouseb_fire",&mousebfire,0},
-    {"mouseb_strafe",&mousebstrafe,1},
-    {"mouseb_forward",&mousebforward,2},
+    {"mouseb_fire",&mousebfire,1},
+    {"mouseb_strafe",&mousebstrafe,9},
+    {"mouseb_forward",&mousebforward,9},
+    {"novert", &novert, 1},
 
     {"use_joystick",&usejoystick, 0},
     {"joyb_fire",&joybfire,0},

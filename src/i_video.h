@@ -16,6 +16,10 @@
 
 #include "doomtype.h"
 
+#include <SDL3/SDL.h>
+
+extern SDL_Window* window;
+
 // Called by D_DoomMain,
 // determines the hardware configuration
 // and sets up the video mode
