@@ -24,25 +24,19 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_pixels.h>
 
-// SDL display number
-int video_display = 0;
-
 SDL_Renderer* renderer = NULL;
 SDL_Window* window = NULL;
 
+// 320x200 buffer for drawing
 SDL_Surface* screen_buffer = NULL;
 SDL_Palette* screen_palette = NULL;
-
-SDL_Texture* render_texture = NULL;
-
 pixel_t* screen_pixels = NULL;
 
-static SDL_Rect blit_rect = {
-    0,
-    0,
-    SCREENWIDTH,
-    SCREENHEIGHT
-};
+// texture to which buffer is blit upscaled
+SDL_Texture* render_texture = NULL;
+
+// read from config file
+int window_w, window_h;
 
 void I_ShutdownGraphics(void)
 {
@@ -84,7 +78,7 @@ void I_FinishUpdate (void)
     if (!SDL_LockTextureToSurface(render_texture, NULL, &lock_surface)) {
         I_Error("Failed to lock texture for rendering: %s", SDL_GetError());
     }
-    SDL_BlitSurfaceUnchecked(screen_buffer, &blit_rect, lock_surface, &blit_rect);
+    SDL_BlitSurfaceScaled(screen_buffer, NULL, lock_surface, NULL, SDL_SCALEMODE_NEAREST);
     SDL_UnlockTexture(render_texture);
 
     SDL_RenderClear(renderer);
@@ -126,7 +120,7 @@ void I_InitGraphics(void)
         I_Error("Failed to init SDL video: %s", SDL_GetError());
     }
 
-    if (!SDL_CreateWindowAndRenderer("Doom", SCREENWIDTH, SCREENHEIGHT, 0, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("Doom", window_w, window_h, 0, &window, &renderer)) {
         I_Error("Failed to create window: %s", SDL_GetError());
     }
 
@@ -143,7 +137,7 @@ void I_InitGraphics(void)
         I_Error("Failed to create palette for screen buffer: %s", SDL_GetError());
     }
 
-    render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREENWIDTH, SCREENHEIGHT);
+    render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_w, window_h);
     if (!render_texture) {
         I_Error("Failed to create rendering texture: %s", SDL_GetError());
     }

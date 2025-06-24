@@ -194,17 +194,8 @@ extern	int	numChannels;
 extern int quit_delay;
 extern int novert;
 
-
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-extern char*	sndserver_filename;
-extern int	mb_used;
-#endif
-
-#ifdef LINUX
-char*		mousetype;
-char*		mousedev;
-#endif
+extern int window_w;
+extern int window_h;
 
 extern char*	chat_macros[];
 
@@ -266,7 +257,10 @@ default_t	defaults[] =
     {"chatmacro8", (int *) &chat_macros[8], (long long int) HUSTR_CHATMACRO8 },
     {"chatmacro9", (int *) &chat_macros[9], (long long int) HUSTR_CHATMACRO9 },
 
-    {"quit_delay", &quit_delay, 0}
+    {"quit_delay", &quit_delay, 0},
+
+    {"window_w", &window_w, 1024},
+    {"window_h", &window_h, 768}
 
 };
 
