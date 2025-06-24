@@ -660,7 +660,7 @@ boolean ST_Responder(SDL_Event* ev)
         
         if (gamemode == commercial)
         {
-        epsd = 0;
+        epsd = 1;
         map = (buf[0] - '0')*10 + buf[1] - '0';
         }
         else
