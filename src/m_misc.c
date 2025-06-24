@@ -253,10 +253,6 @@ default_t	defaults[] =
     {"screenblocks",&screenblocks, 9},
     {"detaillevel",&detailLevel, 0},
 
-    {"snd_channels",&numChannels, 3},
-
-
-
     {"usegamma",&usegamma, 0},
 
     {"chatmacro0", (int *) &chat_macros[0], (long long int) HUSTR_CHATMACRO0 },

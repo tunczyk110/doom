@@ -1,28 +1,18 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// DESCRIPTION:
-//	Created by the sound utility written by Dave Taylor.
-//	Kept as a sample, DOOM2  sounds. Frozen.
-//
-//-----------------------------------------------------------------------------
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-#ifndef __SOUNDS__
-#define __SOUNDS__
-
+#pragma once
 
 //
 // SoundFX struct.
@@ -32,33 +22,28 @@ typedef struct sfxinfo_struct	sfxinfo_t;
 struct sfxinfo_struct
 {
     // up to 6-character name
-    char*	name;
+    char* name;
 
     // Sfx singularity (only one at a time)
-    int		singularity;
+    int singularity;
 
     // Sfx priority
-    int		priority;
+    int priority;
 
     // referenced sound if a link
-    sfxinfo_t*	link;
+    sfxinfo_t* link;
 
     // pitch if a link
-    int		pitch;
+    int pitch;
 
     // volume if a link
-    int		volume;
+    int volume;
 
     // sound data
-    void*	data;
-
-    // this is checked every second to see if sound
-    // can be thrown out (if 0, then decrement, if -1,
-    // then throw out, if > 0, then it is in use)
-    int		usefulness;
+    void* data;
 
     // lump number of sfx
-    int		lumpnum;		
+    int lumpnum;
 };
 
 
@@ -87,7 +72,7 @@ typedef struct
 
 
 // the complete set of sound effects
-extern sfxinfo_t	S_sfx[];
+extern sfxinfo_t S_sfx[];
 
 // the complete set of music
 extern musicinfo_t	S_music[];
@@ -287,11 +272,3 @@ typedef enum
     sfx_radio,
     NUMSFX
 } sfxenum_t;
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
-

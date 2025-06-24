@@ -686,9 +686,9 @@ void G_Ticker (void)
 		  case BTS_PAUSE: 
 		    paused ^= 1; 
 		    if (paused) 
-			S_PauseSound (); 
+			S_PauseMusic (); 
 		    else 
-			S_ResumeSound (); 
+			S_ResumeMusic (); 
 		    break; 
 					 
 		  case BTS_SAVEGAME: 
@@ -1352,7 +1352,7 @@ G_InitNew
     if (paused) 
     { 
 	paused = false; 
-	S_ResumeSound (); 
+	S_ResumeMusic (); 
     } 
 	
 

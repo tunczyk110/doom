@@ -50,7 +50,7 @@ void I_ShutdownGraphics(void)
     SDL_DestroyTexture(render_texture);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
-    SDL_Quit();
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 void I_StartTic (void)
@@ -122,7 +122,7 @@ void I_InitGraphics(void)
 {
     signal(SIGINT, (void (*)(int)) I_Quit);
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         I_Error("Failed to init SDL video: %s", SDL_GetError());
     }
 
