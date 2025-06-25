@@ -166,6 +166,7 @@ void preallocate_sounds(void)
             sfx_info = sfx_info->link;
         }
         sfx_info->lumpnum = I_GetSfxLumpNum(sfx_info);
+        if (sfx_info->lumpnum == -1) continue;
         cache_sound(sfx_info);
     }
 }

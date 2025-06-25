@@ -403,7 +403,7 @@ int W_GetNumForName (char* name)
     i = W_CheckNumForName (name);
     
     if (i == -1)
-      I_Error ("W_GetNumForName: %s not found!", name);
+        printf("W_GetNumForName: %s not found!\n", name);
       
     return i;
 }
