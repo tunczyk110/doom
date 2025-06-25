@@ -206,8 +206,6 @@ typedef struct
     char*	name;
     int*	location;
     long long	defaultvalue;
-    int		scantranslate;		// PC scan code hack
-    int		untranslated;		// lousy hack
 } default_t;
 
 default_t	defaults[] =
