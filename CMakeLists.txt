@@ -6,7 +6,7 @@ target_compile_options(doom PUBLIC -std=gnu17 -DNORMALUNIX -DLINUX -Wno-pointer-
 
 add_subdirectory(src)
 
-target_link_libraries(doom PRIVATE SDL3 SDL3_mixer m)
+target_link_libraries(doom PRIVATE m SDL3 SDL3_mixer jansson)
 
 add_custom_command(
     OUTPUT portdata.wad

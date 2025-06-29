@@ -16,6 +16,7 @@
 
 #include "d_ticcmd.h"
 #include "d_event.h"
+#include "doomdef.h"
 
 // Called by DoomMain.
 void I_Init (void);
@@ -64,3 +65,5 @@ void I_Tactile (int on, int off, int total);
 
 
 void I_Error (char *error, ...);
+
+session_type_t get_session_type();

@@ -710,7 +710,9 @@ void D_DoomMain (void)
     FindResponseFile ();
 	
     IdentifyVersion ();
-	
+
+    D_AddFile("portdata.wad");
+
     setbuf (stdout, NULL);
     modifiedgame = false;
 	
@@ -946,48 +948,6 @@ void D_DoomMain (void)
 	    for (i = 0;i < 23; i++)
 		if (W_CheckNumForName(name[i])<0)
 		    I_Error("\nThis is not the registered version.");
-    }
-    
-    // Iff additonal PWAD files are used, print modified banner
-    if (modifiedgame)
-    {
-	/*m*/printf (
-	    "===========================================================================\n"
-	    "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
-	    "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
-	    "        You will not receive technical support for modified games.\n"
-	    "                      press enter to continue\n"
-	    "===========================================================================\n"
-	    );
-	getchar ();
-    }
-	
-
-    // Check and print which version is executed.
-    switch ( gamemode )
-    {
-      case shareware:
-      case indetermined:
-	printf (
-	    "===========================================================================\n"
-	    "                                Shareware!\n"
-	    "===========================================================================\n"
-	);
-	break;
-      case registered:
-      case retail:
-      case commercial:
-	printf (
-	    "===========================================================================\n"
-	    "                 Commercial product - do not distribute!\n"
-	    "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
-	    "===========================================================================\n"
-	);
-	break;
-	
-      default:
-	// Ouch.
-	break;
     }
 
     printf ("M_Init: Init miscellaneous info.\n");

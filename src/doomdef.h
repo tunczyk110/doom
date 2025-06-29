@@ -212,3 +212,10 @@ typedef enum
     IRONTICS	= (60*TICRATE)
     
 } powerduration_t;
+
+typedef enum
+{
+    SESSION_SINGLE_PLAYER,
+    SESSION_COOPERATIVE,
+    SESSION_DEATHMATCH
+} session_type_t;

@@ -161,3 +161,10 @@ void I_Error (char *error, ...)
     
     exit(-1);
 }
+
+session_type_t get_session_type()
+{
+    if (deathmatch) return SESSION_DEATHMATCH;
+    else if (netgame) return SESSION_COOPERATIVE;
+    return SESSION_SINGLE_PLAYER;
+}

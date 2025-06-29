@@ -26,7 +26,9 @@ typedef enum sbarelem_type_t {
     SBAR_ELEM_FACE,
     SBAR_ELEM_FACE_BG,
     SBAR_ELEM_NUMBER,
-    SBAR_ELEM_PERCENT
+    SBAR_ELEM_PERCENT,
+
+    SBAR_ELEM_TOTAL
 } sbarelem_type_t;
 
 typedef enum sbar_condition_enum_t {
@@ -206,13 +208,14 @@ typedef struct sbarelem_loadinfo_t {
     sbar_condition_t* conditions;
 } sbarelem_loadinfo_t;
 
+void parse_sbardef();
 
 boolean check_conditions(sbar_condition_t* conditions, int conditions_len);
 
 numberfont_t* load_number_font(numberfont_type_t type, const char* stem);
 
 sbarelem_t* load_canvas(const sbarelem_loadinfo_t* loadinfo);
-sbarelem_t* load_graphic(const sbarelem_loadinfo_t* loadinfo, char* patch_name);
+sbarelem_t* load_graphic(const sbarelem_loadinfo_t* loadinfo, const char* patch_name);
 sbarelem_t* load_animation(const sbarelem_loadinfo_t* loadinfo);
 sbarelem_t* load_face(const sbarelem_loadinfo_t* loadinfo);
 sbarelem_t* load_face_bg(const sbarelem_loadinfo_t* loadinfo);

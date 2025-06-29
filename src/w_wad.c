@@ -574,4 +574,29 @@ void W_Profile (void)
     fclose (f);
 }
 
+// regular cache lump doesn't work since
+// the loaded text isn't zero terminated
+char* cache_text_lump_name(const char* name, int tag)
+{
+    int num = W_CheckNumForName(name);
+    if (num < 0) return NULL;
 
+    int len = W_LumpLength(num);
+
+    if (!lumpcache[num]) {
+        lumpinfo_t* l = lumpinfo+num;
+
+        int handle = l->handle;
+
+        lseek (handle, l->position, SEEK_SET);
+        byte* raw = Z_Malloc(len, PU_STATIC, NULL);
+        read(handle, raw, l->size);
+        lumpcache[num] = Z_Malloc (len+1, tag, &lumpcache[num]);
+        memset(lumpcache[num], 0, len+1);
+        memcpy(lumpcache[num], raw, len);
+        Z_Free(raw);
+    } else {
+	    Z_ChangeTag (lumpcache[num],tag);
+    }
+    return lumpcache[num];
+}

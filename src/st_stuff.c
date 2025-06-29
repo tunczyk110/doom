@@ -79,9 +79,12 @@ static boolean oldweaponsowned[NUMWEAPONS];
 #define STBAR_WIDTH SCREENWIDTH
 
 statusbar_t* active_bar;
-statusbar_t* status_bars;
 
-numberfont_t* number_fonts;
+int statusbars_len = 0;
+statusbar_t** status_bars;
+
+numberfont_t** number_fonts;
+int numberfonts_len = 0;
 
 boolean ST_Responder (SDL_Event* ev)
 {
@@ -255,7 +258,7 @@ void ST_doPaletteStuff(void)
             palette = NUMBONUSPALS-1;
 
         palette += STARTBONUSPALS;
-    } else if ( player->powers[pw_ironfeet] > 4*32 || player->powers[pw_ironfeet]&8) {
+    } else if (player->powers[pw_ironfeet] > 4*32 || player->powers[pw_ironfeet]&8) {
         palette = RADIATIONPAL;
     } else {
         palette = 0;
@@ -319,7 +322,7 @@ void st_draw_elements(sbarelem_t** elems, int len, int parent_x, int parent_y)
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
     ST_doPaletteStuff();
-    st_draw_elements(active_bar->children, active_bar->children_len, 0, 0);
+    st_draw_elements(status_bars[0]->children, status_bars[0]->children_len, 0, 0);
 
     V_CopyRect(0, 0, 4, STBAR_WIDTH, active_bar->height, 0, SCREENHEIGHT - active_bar->height, 0);
 }
@@ -351,50 +354,11 @@ void ST_Init (void)
 {
     st_load_face_patches();
 
-    // parse_sbardef();
+    parse_sbardef();
 
     lu_palette = W_GetNumForName ("PLAYPAL");
 
-    status_bars = Z_Malloc(sizeof(statusbar_t), PU_STATIC, NULL);
-    status_bars->height = 32,
-    status_bars->fullscreen_render = false,
-    status_bars->fill_flat = "FILL",
-
-    number_fonts = Z_Malloc(sizeof(numberfont_t), PU_STATIC, NULL);
-
-    number_fonts = load_number_font(SBAR_NUMFONT_TYPE_MONO_SPACED_ZERO, "STT");
-
-    status_bars->children_len = 5;
-    status_bars->children = Z_Malloc(sizeof(sbarelem_t*)*status_bars->children_len, PU_STATIC, NULL);
-
-    sbarelem_loadinfo_t loadinfo = {.x = 0,
-         .y = 0, .alignment = 0, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[0] = load_graphic(&loadinfo, "STBAR");
-
-    sbarelem_loadinfo_t loadinfo2 = {.x = 143,
-         .y = 0, .alignment = 0, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[1] = load_face(&loadinfo2);
-
-    sbarelem_loadinfo_t loadinfo3 = {.x = 44,
-         .y = 3, .alignment = 2, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[2] = load_number(&loadinfo3, 0, SBAR_NUMTYPE_AMMO_CURRENT_WEAP, 0, 3);
-
-    sbarelem_loadinfo_t loadinfo4 = {.x = 104,
-         .y = 3, .alignment = 2, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[3] = load_percent(&loadinfo4, 0, SBAR_NUMTYPE_HEALTH, 0, 3);
-
-    sbarelem_loadinfo_t loadinfo5 = {.x = 104,
-         .y = 0, .alignment = 0, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[4] = load_graphic(&loadinfo5, "STARMS");
-
-    status_bars->children[4]->graphic.children_len = 1;
-    status_bars->children[4]->graphic.children = Z_Malloc(sizeof(sbarelem_t*)*status_bars->children[4]->graphic.children_len, PU_STATIC, NULL);
-
-    sbarelem_loadinfo_t loadinfo6 = {.x = 7,
-         .y = 4, .alignment = 0, .tranmap = NULL, .translation = NULL, .conditions_len = 0, .conditions = NULL};
-    status_bars->children[4]->graphic.children[0] = load_graphic(&loadinfo6, "STYSNUM2");
-
-    active_bar = status_bars;
+    active_bar = status_bars[0];
 
     screens[4] = (byte *) Z_Malloc(STBAR_WIDTH*active_bar->height, PU_STATIC, 0);
 }
