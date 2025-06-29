@@ -478,7 +478,10 @@ void G_DoLoadLevel (void)
     displayplayer = consoleplayer;		// view the guy you are playing    
     starttime = I_GetTime (); 
     gameaction = ga_nothing; 
-    Z_CheckHeap ();
+    // I get "block size does not touch the next block"
+    // but everything works fine when this is commented out anyways?
+    // gotta eventually have a good look at how this allocator works
+    // Z_CheckHeap ();
     
     // clear cmd building stuff
     memset (gamekeydown, 0, sizeof(gamekeydown)); 

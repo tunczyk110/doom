@@ -17,17 +17,6 @@
 #include "doomtype.h"
 #include "d_event.h"
 
-// Size of statusbar.
-// Now sensitive for scaling.
-#define ST_HEIGHT	32*SCREEN_MUL
-#define ST_WIDTH	SCREENWIDTH
-#define ST_Y		(SCREENHEIGHT - ST_HEIGHT)
-
-
-//
-// STATUS BAR
-//
-
 // Called by main loop.
 boolean ST_Responder (SDL_Event* ev);
 
@@ -42,26 +31,3 @@ void ST_Start (void);
 
 // Called by startup code.
 void ST_Init (void);
-
-
-
-// States for status bar code.
-typedef enum
-{
-    AutomapState,
-    FirstPersonState
-    
-} st_stateenum_t;
-
-
-// States for the chat code.
-typedef enum
-{
-    StartChatState,
-    WaitDestState,
-    GetChatState
-    
-} st_chatstateenum_t;
-
-
-boolean ST_Responder(SDL_Event* ev);

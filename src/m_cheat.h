@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include "doomtype.h"
+
 #include <SDL3/SDL.h>
 
 //
@@ -29,6 +31,8 @@ typedef struct
     unsigned char*	sequence;
     unsigned char*	p;
 } cheatseq_t;
+
+boolean check_cheat_input(SDL_Event* event);
 
 int cht_CheckCheat(cheatseq_t*	cht, SDL_Scancode key);
 
