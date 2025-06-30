@@ -50,6 +50,7 @@
 
 #include "m_menu.h"
 
+#include "st_lib.h"
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
@@ -1131,7 +1132,9 @@ void M_ChangeDetail(int choice)
 }
 
 
+extern statusbar_t* active_bar;
 
+extern statusbar_t** status_bars;
 
 void M_SizeDisplay(int choice)
 {
@@ -1152,7 +1155,8 @@ void M_SizeDisplay(int choice)
 	}
 	break;
     }
-	
+    int bar_index = screenblocks-10 < 0 ? 0 : screenblocks - 10;
+	active_bar = status_bars[bar_index];
 
     R_SetViewSize (screenblocks, detailLevel);
 }

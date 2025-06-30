@@ -1,31 +1,16 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
+
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2025 by Michał Tomczyk
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	Gamma correction LUT stuff.
-//	Functions to draw patches (by post) directly to screen.
-//	Functions to blit a block to the screen.
-//
-//-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: v_video.c,v 1.5 1997/02/03 22:45:13 b1 Exp $";
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 
 #include "i_system.h"
@@ -268,7 +253,58 @@ V_DrawPatch
 				    + 4 ); 
 	} 
     }			 
-} 
+}
+
+extern SDL_Color palette_colors[256];
+
+void v_draw_patch_truecolor_surface(int x, int y, SDL_Surface* surface, patch_t* patch)
+{
+    int count;
+    int col;
+    column_t* column;
+    SDL_Color* desttop;
+    SDL_Color* dest;
+    byte* source;
+    int w;
+
+    y -= SHORT(patch->topoffset);
+    x -= SHORT(patch->leftoffset);
+#ifdef RANGECHECK
+    if (x<0
+	||x+SHORT(patch->width) >SCREENWIDTH
+	|| y<0
+	|| y+SHORT(patch->height)>SCREENHEIGHT)
+    {
+      fprintf( stderr, "Patch at %d,%d exceeds LFB\n", x,y );
+      // No I_Error abort - what is up with TNT.WAD?
+      fprintf( stderr, "v_draw_patch_truecolor_surface: bad patch (ignored)\n");
+      return;
+    }
+#endif
+
+    col = 0;
+
+    desttop = (SDL_Color*)surface->pixels+y*SCREENWIDTH+x;
+
+    w = SHORT(patch->width);
+
+    for ( ; col<w ; x++, col++, desttop++) {
+        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff) {
+            source = (byte *)column + 3;
+            dest = desttop + column->topdelta*SCREENWIDTH;
+            count = column->length;
+
+            while (count--) {
+                *dest = palette_colors[*source++];
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
  
 //
 // V_DrawPatchFlipped 

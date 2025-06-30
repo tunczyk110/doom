@@ -32,6 +32,12 @@ SDL_Surface* screen_buffer = NULL;
 SDL_Palette* screen_palette = NULL;
 pixel_t* screen_pixels = NULL;
 
+SDL_Color palette_colors[256];
+
+// 320x200 buffer for status bar
+// not palleted to support transparency
+SDL_Surface* stbar_buffer = NULL;
+
 // texture to which buffer is blit upscaled
 SDL_Texture* render_texture = NULL;
 
@@ -79,6 +85,7 @@ void I_FinishUpdate (void)
         I_Error("Failed to lock texture for rendering: %s", SDL_GetError());
     }
     SDL_BlitSurfaceScaled(screen_buffer, NULL, lock_surface, NULL, SDL_SCALEMODE_NEAREST);
+    SDL_BlitSurfaceScaled(stbar_buffer, NULL, lock_surface, NULL, SDL_SCALEMODE_NEAREST);
     SDL_UnlockTexture(render_texture);
 
     SDL_RenderClear(renderer);
@@ -86,11 +93,29 @@ void I_FinishUpdate (void)
     SDL_RenderTexture(renderer, render_texture, NULL, NULL);
 
     SDL_RenderPresent(renderer);
+
+    SDL_ClearSurface(stbar_buffer, 0, 0, 0, 0);
 }
 
 void I_ReadScreen (byte* scr)
 {
-    memcpy (scr, screen_pixels, SCREENWIDTH*SCREENHEIGHT);
+    // this is broken, but something like this is needed to also use
+    // status bar for drawing screen wipes
+
+    // static SDL_Surface* paletted_buffer = NULL;
+    // if (!paletted_buffer) paletted_buffer = SDL_CreateSurface(SCREENWIDTH, SCREENHEIGHT, SDL_PIXELFORMAT_INDEX8);
+    // static SDL_Palette* buf_palette = NULL;
+    // if (!buf_palette) buf_palette = SDL_CreateSurfacePalette(screen_buffer);
+
+    // SDL_SetPaletteColors(buf_palette, palette_colors, 0, 256);
+    // SDL_Surface* lock_surface = NULL;
+    // if (!SDL_LockTextureToSurface(render_texture, NULL, &lock_surface)) {
+    //     I_Error("Failed to lock texture for rendering: %s", SDL_GetError());
+    // }
+    // SDL_BlitSurfaceScaled(lock_surface, NULL, paletted_buffer, NULL, SDL_SCALEMODE_NEAREST);
+    // SDL_UnlockTexture(render_texture);
+    // memcpy (scr, paletted_buffer->pixels, SCREENWIDTH*SCREENHEIGHT);
+    memcpy(scr, screen_pixels,  SCREENWIDTH*SCREENHEIGHT);
 }
 
 void I_SetPalette (byte* doompalette)
@@ -99,22 +124,26 @@ void I_SetPalette (byte* doompalette)
         I_Error("Error when trying to set palette; the ptr is NULL");
     }
 
-    SDL_Color colors[256];
-
     for (int i=0; i<256; ++i)
     {
-        colors[i].a = 0xFFu;
-        colors[i].r = gammatable[usegamma][*doompalette++];
-        colors[i].g = gammatable[usegamma][*doompalette++];
-        colors[i].b = gammatable[usegamma][*doompalette++];
+        palette_colors[i].r = gammatable[usegamma][*doompalette++];
+        palette_colors[i].g = gammatable[usegamma][*doompalette++];
+        palette_colors[i].b = gammatable[usegamma][*doompalette++];
+        palette_colors[i].a = 0xFFu;
     }
 
-    SDL_SetPaletteColors(screen_palette, colors, 0, 256);
+    SDL_SetPaletteColors(screen_palette, palette_colors, 0, 256);
+}
+
+void signal_handler(int signal) {
+    if (signal == SIGINT) {
+        I_Quit();
+    }
 }
 
 void I_InitGraphics(void)
 {
-    signal(SIGINT, (void (*)(int)) I_Quit);
+    signal(SIGINT, signal_handler);
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         I_Error("Failed to init SDL video: %s", SDL_GetError());
@@ -123,10 +152,6 @@ void I_InitGraphics(void)
     if (!SDL_CreateWindowAndRenderer("Doom", window_w, window_h, 0, &window, &renderer)) {
         I_Error("Failed to create window: %s", SDL_GetError());
     }
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
 
     screen_buffer = SDL_CreateSurface(SCREENWIDTH, SCREENHEIGHT, SDL_PIXELFORMAT_INDEX8);
     if (!screen_buffer) {
@@ -137,15 +162,19 @@ void I_InitGraphics(void)
         I_Error("Failed to create palette for screen buffer: %s", SDL_GetError());
     }
 
-    render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_w, window_h);
+    render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_w, window_h);
     if (!render_texture) {
         I_Error("Failed to create rendering texture: %s", SDL_GetError());
     }
 
+    stbar_buffer = SDL_CreateSurface(SCREENWIDTH, SCREENHEIGHT, SDL_PIXELFORMAT_RGBA32);
+    if (!stbar_buffer) {
+        I_Error("Failed to create status bar render buffer: %s", SDL_GetError());
+    }
+
     screen_pixels = screen_buffer->pixels;
 
-    byte* doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
-    I_SetPalette(doompal);
+    I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
 
     SDL_SetWindowMouseGrab(window, true);
     SDL_HideCursor();

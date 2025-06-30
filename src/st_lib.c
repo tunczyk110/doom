@@ -36,6 +36,8 @@ extern numberfont_t** number_fonts;
 
 char** numfont_names;
 
+extern SDL_Surface* stbar_buffer;
+
 int get_numfont_index_from_name(const char* name) {
     for (int i = 0; i < numberfonts_len; ++i) {
         if (!strcmp(name, numfont_names[i])) {
@@ -314,7 +316,7 @@ sbarelem_t* load_graphic(const sbarelem_loadinfo_t* loadinfo, const char* patch_
     sbarelem_t* elem = load_canvas(loadinfo);
 
     elem->type = SBAR_ELEM_GRAPHIC;
-    if (W_GetNumForName(patch_name) < 0) {
+    if (W_CheckNumForName(patch_name) < 0) {
         elem->graphic.patch = NULL;
     } else {
         elem->graphic.patch = W_CacheLumpName(patch_name, PU_STATIC);
@@ -388,6 +390,8 @@ boolean check_conditions(sbar_condition_t* conditions, int conditions_len)
             if (player->readyweapon == wp_fist || player->readyweapon == wp_chainsaw) return false;
             continue;
         case SBAR_COND_PARAM_AMMO_MATCHES_SELECTED_WEAPON:
+            if (param != weaponinfo[player->readyweapon].ammo) return false;
+            continue;
         case SBAR_COND_PARAM_SLOT_ANY_WEAPON_OWNED:
         case SBAR_COND_PARAM_SLOT_ANY_WEAPON_NOT_OWNED:
         case SBAR_COND_PARAM_SLOT_ANY_WEAPON_SELECTED:
@@ -410,9 +414,11 @@ boolean check_conditions(sbar_condition_t* conditions, int conditions_len)
             continue;
         case SBAR_COND_PARAM_GAME_MODE_EQUAL_CURRENT_MODE:
         case SBAR_COND_17:
-        case SBAR_COND_PARAM_HUD_MODE_EQUAL_CURRENT_MODE:
-            // todo when gameconf is implemented
             return false;
+        case SBAR_COND_PARAM_HUD_MODE_EQUAL_CURRENT_MODE:
+            // todo: implement compact support
+            if (param == 1) return false;
+            continue;
         default:
             continue;
         }
@@ -427,7 +433,7 @@ void st_draw_graphic(sbar_graphic_t* widget, int parent_x, int parent_y)
     int x = widget->x + parent_x,
         y = widget->y + parent_y;
     align_coordinates(&x, &y, widget->alignment, widget->patch->width, widget->patch->height);
-    V_DrawPatch(x, y, 4, widget->patch);
+    v_draw_patch_truecolor_surface(x, y, stbar_buffer, widget->patch);
 }
 
 void st_draw_number(sbar_number_t* widget, boolean percent, int parent_x, int parent_y)
@@ -498,7 +504,7 @@ void st_draw_number(sbar_number_t* widget, boolean percent, int parent_x, int pa
     }
 
     if (display_value < 0) {
-        V_DrawPatch(x, widget->y, 4, font->patches[NUMFONT_MINUS_INDEX]);
+        v_draw_patch_truecolor_surface(x, widget->y, stbar_buffer, font->patches[NUMFONT_MINUS_INDEX]);
         x += x_shift;
         display_value = -display_value;
     }
@@ -513,16 +519,15 @@ void st_draw_number(sbar_number_t* widget, boolean percent, int parent_x, int pa
             digit = 0;
         } else continue;
 
-        V_DrawPatch(x, y, 4, font->patches[digit]);
+        v_draw_patch_truecolor_surface(x, y, stbar_buffer, font->patches[digit]);
         display_value = display_value % order;
         x += x_shift;
         found_first_digit = true;
     }
     if (percent) {
-        V_DrawPatch(x, y, 4, font->patches[NUMFONT_PRCNT_INDEX]);
+        v_draw_patch_truecolor_surface(x, y, stbar_buffer, font->patches[NUMFONT_PRCNT_INDEX]);
     }
 }
-
 
 void st_draw_face(sbar_face_t* widget, int parent_x, int parent_y)
 {
@@ -530,7 +535,7 @@ void st_draw_face(sbar_face_t* widget, int parent_x, int parent_y)
         y = widget->y + parent_y;
     align_coordinates(&x, &y, widget->alignment, face_patches[st_faceindex]->width, face_patches[st_faceindex]->height);
 
-    V_DrawPatch(x, y, 4, face_patches[st_faceindex]);
+    v_draw_patch_truecolor_surface(x, y, stbar_buffer, face_patches[st_faceindex]);
 }
 
 void st_draw_face_bg(sbar_face_bg_t* widget, int parent_x, int parent_y)
@@ -541,5 +546,5 @@ void st_draw_face_bg(sbar_face_bg_t* widget, int parent_x, int parent_y)
     int x = widget->x + parent_x,
         y = widget->y + parent_y;
     align_coordinates(&x, &y, widget->alignment, patch->width, patch->height);
-    V_DrawPatch(widget->x + parent_x, widget->y + parent_y, 4, patch);
+    v_draw_patch_truecolor_surface(widget->x + parent_x, widget->y + parent_y, stbar_buffer, patch);
 }

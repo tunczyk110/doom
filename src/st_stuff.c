@@ -322,9 +322,10 @@ void st_draw_elements(sbarelem_t** elems, int len, int parent_x, int parent_y)
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
     ST_doPaletteStuff();
-    st_draw_elements(status_bars[0]->children, status_bars[0]->children_len, 0, 0);
 
-    V_CopyRect(0, 0, 4, STBAR_WIDTH, active_bar->height, 0, SCREENHEIGHT - active_bar->height, 0);
+    int bar_y = active_bar->fullscreen_render ? 0 : SCREENHEIGHT - active_bar->height;
+
+    st_draw_elements(active_bar->children, active_bar->children_len, 0, bar_y);
 }
 
 // Called when the console player is spawned on each level.
